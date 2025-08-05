@@ -3,4 +3,5 @@ __pycache__/
 *.pyc
 logs/
 mlruns/
-data/
+data/* # Ignore all data files
+!data/*.dvc # Keep DVC-tracked data files
