@@ -66,3 +66,21 @@ if best_run_id:
     )
 
     print(f"Model registered as '{registered_model_name}' in MLflow Model Registry.")
+
+# Automate stage promotion    
+
+from mlflow.tracking import MlflowClient
+
+client = MlflowClient()
+
+# Find latest version of the registered model
+latest_version = client.get_latest_versions(registered_model_name, stages=["None"])[0].version
+
+# Promote it to Staging (or Production)
+client.transition_model_version_stage(
+    name=registered_model_name,
+    version=latest_version,
+    stage="Staging",  # or "Production"
+)
+
+print(f"Model version {latest_version} promoted to 'Staging'.")
