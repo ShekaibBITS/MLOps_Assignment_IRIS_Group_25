@@ -2,17 +2,26 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import mlflow.pyfunc
 import pandas as pd
+from sklearn.datasets import load_iris
 
-# Load the model from MLflow Model Registry
+# Load class names from sklearn
+iris = load_iris()
+class_names = iris.target_names  # ['setosa', 'versicolor', 'virginica']
+
+# Load the MLflow registered model
 MODEL_NAME = "iris-best-model"
-STAGE = "Production"  # or "Staging"
+STAGE = "Production" # or "Staging" depending on your deployment stage
+# Load the model from MLflow
 model = mlflow.pyfunc.load_model(f"models:/{MODEL_NAME}/{STAGE}")
 
-app = FastAPI()
+app = FastAPI()     
 
-# Input schema for prediction
+# Define input schema with named features
 class IrisInput(BaseModel):
-    features: list  # e.g., [5.1, 3.5, 1.4, 0.2]
+    sepal_length: float
+    sepal_width: float
+    petal_length: float
+    petal_width: float
 
 @app.get("/")
 def read_root():
@@ -21,8 +30,14 @@ def read_root():
 @app.post("/predict")
 def predict(input_data: IrisInput):
     try:
-        df = pd.DataFrame([input_data.features])
+        # Convert input to DataFrame
+        df = pd.DataFrame([input_data.dict()])
         prediction = model.predict(df)
-        return {"prediction": prediction.tolist()}
+        class_index = int(prediction[0])
+        class_name = class_names[class_index]
+        return {
+            "input_features": input_data.dict(),
+            "predicted_class": class_name
+        }
     except Exception as e:
         return {"error": str(e)}
