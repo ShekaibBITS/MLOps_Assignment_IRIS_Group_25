@@ -10,7 +10,7 @@ class_names = iris.target_names  # ['setosa', 'versicolor', 'virginica']
 
 # Load the MLflow registered model
 MODEL_NAME = "iris-best-model"
-STAGE = "Production" # or "Staging" depending on your deployment stage
+STAGE = "Staging" # or "Staging" depending on your deployment stage
 # Load the model from MLflow
 model = mlflow.pyfunc.load_model(f"models:/{MODEL_NAME}/{STAGE}")
 
