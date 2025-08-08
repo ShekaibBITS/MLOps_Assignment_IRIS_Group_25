@@ -6,6 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from mlflow.models.signature import infer_signature
 from data_preprocessing import load_data
+from mlflow.tracking import MlflowClient
 
 # Load data
 df = load_data()
@@ -22,7 +23,7 @@ models = {
     "RandomForest": RandomForestClassifier()
 }
 
-# To track best model
+# Track best model
 best_accuracy = 0
 best_model_name = None
 best_run_id = None
@@ -33,20 +34,17 @@ for name, model in models.items():
         preds = model.predict(X_test)
         acc = accuracy_score(y_test, preds)
 
-        # Log parameters and metrics
         mlflow.log_param("model", name)
         mlflow.log_metric("accuracy", acc)
 
-        # Log model with signature
         signature = infer_signature(X_train, model.predict(X_train))
         mlflow.sklearn.log_model(
             sk_model=model,
-            name=name,  # Name of the logged model artifact
+            name=name,
             input_example=X_train.iloc[:1],
             signature=signature
         )
 
-        # Save best run info
         if acc > best_accuracy:
             best_accuracy = acc
             best_model_name = name
@@ -60,27 +58,21 @@ if best_run_id:
     print(f"\nBest model: {best_model_name} with accuracy: {best_accuracy:.4f}")
     print(f"Registering model from run ID: {best_run_id}")
 
-    mlflow.register_model(
+    result = mlflow.register_model(
         model_uri=model_uri,
         name=registered_model_name
     )
 
-    print(f"Model registered as '{registered_model_name}' in MLflow Model Registry.")
+    client = MlflowClient()
 
-# Automate stage promotion    
+    # Wait until model is registered before aliasing
+    latest_version = result.version
 
-from mlflow.tracking import MlflowClient
+    # Set alias 'champion' to latest version
+    client.set_registered_model_alias(
+        name=registered_model_name,
+        alias="champion",
+        version=latest_version
+    )
 
-client = MlflowClient()
-
-# Find latest version of the registered model
-latest_version = client.get_latest_versions(registered_model_name, stages=["None"])[0].version
-
-# Promote it to Staging (or Production)
-client.transition_model_version_stage(
-    name=registered_model_name,
-    version=latest_version,
-    stage="Staging",  # or "Production"
-)
-
-print(f"Model version {latest_version} promoted to 'Staging'.")
+    print(f"Model registered as '{registered_model_name}' and tagged with alias '@champion'.")
