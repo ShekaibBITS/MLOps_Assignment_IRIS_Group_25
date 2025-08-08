@@ -8,11 +8,22 @@ from mlflow.models.signature import infer_signature
 from data_preprocessing import load_data
 from mlflow.tracking import MlflowClient
 
-# Load data
+# Load and rename data for consistent schema
 df = load_data()
+
+# Rename columns to match API input schema
+df.rename(columns={
+    "sepal length (cm)": "sepal_length",
+    "sepal width (cm)": "sepal_width",
+    "petal length (cm)": "petal_length",
+    "petal width (cm)": "petal_width"
+}, inplace=True)
+
+# Split features and target
 X = df.drop(columns=["target"])
 y = df["target"]
 
+# Split into training and test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Define MLflow experiment
