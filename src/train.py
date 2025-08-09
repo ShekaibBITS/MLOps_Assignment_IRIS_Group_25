@@ -29,7 +29,9 @@ X = df.drop(columns=["target"])
 y = df["target"]
 
 # Split into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Define MLflow experiment
 mlflow.set_experiment("iris_experiment")
@@ -91,4 +93,5 @@ if best_run_id:
         version=latest_version
     )
 
-    print(f"Model registered as '{registered_model_name}' and tagged with alias '@champion'.")
+    print(f"Model registered as '{registered_model_name}' "
+          f"and tagged with alias '@champion'.")
