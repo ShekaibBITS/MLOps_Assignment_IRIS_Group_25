@@ -1,16 +1,20 @@
 # .flake8   configuration file
 # This file is used to configure the behavior of flake8, a tool for checking the
 # style guide enforcement for Python code.
-max-line-length = 88
-exclude = 
+max-line-length = 122   # Set maximum line length to 88 characters      
+exclude =   # Exclude certain directories and files from being checked
     .git,
     __pycache__,
     venv,
     .venv,
+    */site-packages/*,
     build,
     dist,
     .eggs,
-    *.egg
+    *.egg,
+    .mypy_cache,
+    .pytest_cache,
+    node_modules
 ignore =
     E203,  # whitespace before ':'
     W503,  # line break before binary operator
