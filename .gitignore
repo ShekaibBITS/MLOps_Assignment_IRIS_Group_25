@@ -1,7 +1,12 @@
 venv/
 __pycache__/
 *.pyc
-logs/
+# Ignore all files in logs/
+logs/*
+# But keep the .gitkeep file
+!logs/.gitkeep
 mlruns/
-data/* # Ignore all data files
-!data/*.dvc # Keep DVC-tracked data files
+# Ignore all data files
+data/* 
+# Keep DVC-tracked data files
+!data/*.dvc 
