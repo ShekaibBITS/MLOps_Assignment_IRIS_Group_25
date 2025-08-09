@@ -1,5 +1,6 @@
 import mlflow
 import mlflow.sklearn
+import os
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -7,6 +8,10 @@ from sklearn.metrics import accuracy_score
 from mlflow.models.signature import infer_signature
 from data_preprocessing import load_data
 from mlflow.tracking import MlflowClient
+
+# Tell MLflow where the tracking/registry server is (local default).
+mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5001"))
+mlflow.set_registry_uri(mlflow.get_tracking_uri())
 
 # Load and rename data for consistent schema
 df = load_data()

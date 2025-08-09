@@ -4,25 +4,36 @@ import mlflow.pyfunc
 import pandas as pd
 from sklearn.datasets import load_iris
 
-# Load class names from sklearn
 iris = load_iris()
-class_names = iris.target_names  # ['setosa', 'versicolor', 'virginica']
+class_names = iris.target_names
 
-# Load the MLflow registered model using ALIAS (not deprecated stages)
 MODEL_NAME = "iris-best-model"
-ALIAS = "champion"  # Use the alias set in train.py
-
-# Load the model using the alias
-model = mlflow.pyfunc.load_model(f"models:/{MODEL_NAME}@{ALIAS}")
+ALIAS = "champion"
 
 app = FastAPI()
+model = None  # will be set on startup
 
-# Define input schema with named features
 class IrisInput(BaseModel):
     sepal_length: float
     sepal_width: float
     petal_length: float
     petal_width: float
+
+@app.on_event("startup")
+def load_model_on_startup():
+    global model
+    try:
+        model = mlflow.pyfunc.load_model(f"models:/{MODEL_NAME}@{ALIAS}")
+    except Exception as e:
+        # Fail fast with a clear message (surfaces in docker logs)
+        raise RuntimeError(
+            f"Failed to load MLflow model '{MODEL_NAME}@{ALIAS}'. "
+            f"Check MLFLOW_TRACKING_URI/REGISTRY_URI and that the alias exists. Error: {e}"
+        )
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "model_loaded": model is not None}
 
 @app.get("/")
 def read_root():
@@ -30,15 +41,7 @@ def read_root():
 
 @app.post("/predict")
 def predict(input_data: IrisInput):
-    try:
-        # Convert input to DataFrame
-        df = pd.DataFrame([input_data.model_dump()])
-        prediction = model.predict(df)
-        class_index = int(prediction[0])
-        class_name = class_names[class_index]
-        return {
-            "input_features": input_data.model_dump(),
-            "predicted_class": class_name
-        }
-    except Exception as e:
-        return {"error": str(e)}
+    df = pd.DataFrame([input_data.model_dump()])
+    pred = model.predict(df)
+    class_name = class_names[int(pred[0])]
+    return {"input_features": input_data.model_dump(), "predicted_class": class_name}

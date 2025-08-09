@@ -1,0 +1,16 @@
+# .flake8   configuration file
+# This file is used to configure the behavior of flake8, a tool for checking the
+# style guide enforcement for Python code.
+max-line-length = 88
+exclude = 
+    .git,
+    __pycache__,
+    venv,
+    .venv,
+    build,
+    dist,
+    .eggs,
+    *.egg
+ignore =
+    E203,  # whitespace before ':'
+    W503,  # line break before binary operator
