@@ -6,6 +6,7 @@ logs/*
 # But keep the .gitkeep file
 !logs/.gitkeep
 mlruns/
+mlartifacts/
 # Ignore all data files
 data/* 
 # Keep DVC-tracked data files
