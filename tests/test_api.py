@@ -2,8 +2,8 @@
 import os
 os.environ["USE_LOCAL_MODEL"] = "true"  # noqa: E402
 
-from fastapi.testclient import TestClient
-from api.main import app
+from fastapi.testclient import TestClient # noqa: E402
+from api.main import app # noqa: E402
 
 
 def test_health():
