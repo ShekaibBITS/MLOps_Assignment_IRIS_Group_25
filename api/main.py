@@ -31,6 +31,9 @@ DB_PATH = os.path.join(LOG_DIR, "predictions.db")
 iris = load_iris()
 CLASS_NAMES = iris.target_names
 
+# >>> ADDED: allow loading a locally exported model (for CI / offline runs)
+USE_LOCAL = os.getenv("USE_LOCAL_MODEL", "false").lower() == "true"
+LOCAL_DIR = "exported_model"                           # MLflow pyfunc directory
 
 # -------------------- Logging setup --------------------
 
@@ -115,7 +118,14 @@ model = None  # set in lifespan
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global model
-    model = mlflow.pyfunc.load_model(f"models:/{MODEL_NAME}@{ALIAS}")
+    # Prefer a local exported MLflow pyfunc model when requested
+    if USE_LOCAL and os.path.isdir(LOCAL_DIR):
+        model = mlflow.pyfunc.load_model(LOCAL_DIR)
+        LOGGER.info("Loaded local pyfunc model from %s", LOCAL_DIR)
+    else:
+        model = mlflow.pyfunc.load_model(f"models:/{MODEL_NAME}@{ALIAS}")
+        LOGGER.info("Loaded model from MLflow alias %s@%s", MODEL_NAME, ALIAS)
+
     init_db()
     LOGGER.info("Startup: model loaded and SQLite initialized.")
     try:

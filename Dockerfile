@@ -21,6 +21,17 @@ RUN pip install --no-cache-dir -r requirements.api.txt
 ENV MLFLOW_TRACKING_URI=http://host.docker.internal:5001
 ENV MLFLOW_REGISTRY_URI=${MLFLOW_TRACKING_URI}
 
+# ---------------- ADDED: toggle + baked model copy ----------------
+# Build-time toggle to use local exported model (default false for dev)
+# docker build -t iris-api-offline --build-arg USE_LOCAL_MODEL=true ## when running from local model in dev.
+ARG USE_LOCAL_MODEL=false
+ENV USE_LOCAL_MODEL=${USE_LOCAL_MODEL}
+
+# If you want the image to run offline, make sure exported_model/ exists
+# before building. This COPY ensures it's inside the image at /app/exported_model
+COPY exported_model /app/exported_model
+# ------------------------------------------------------------------
+
 # Copy source code
 COPY . .
 

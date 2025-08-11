@@ -30,9 +30,10 @@ jobs:
       - name: Run tests
         env:
           PYTHONPATH: ${{ github.workspace }}
-          # Point tests at your host MLflow server substitute (not required for unit tests here)
-          MLFLOW_TRACKING_URI: http://localhost:9999
-          MLFLOW_REGISTRY_URI: http://localhost:9999
+          USE_LOCAL_MODEL: "true"
+          # # Point tests at your host MLflow server substitute (not required for unit tests here)
+          # MLFLOW_TRACKING_URI: http://localhost:9999
+          # MLFLOW_REGISTRY_URI: http://localhost:9999
         run: pytest -q
 
   docker:
