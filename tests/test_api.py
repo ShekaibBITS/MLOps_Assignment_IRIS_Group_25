@@ -1,6 +1,6 @@
 # tests/test_api.py
 import os
-os.environ["USE_LOCAL_MODEL"] = "true"  # must be set before importing app
+os.environ["USE_LOCAL_MODEL"] = "true"  # noqa: E402
 
 from fastapi.testclient import TestClient
 from api.main import app
