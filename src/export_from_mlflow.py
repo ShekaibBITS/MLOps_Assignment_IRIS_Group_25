@@ -10,6 +10,7 @@ MODEL_NAME = os.getenv("MODEL_NAME", "iris-best-model")
 ALIAS = os.getenv("MODEL_ALIAS", "champion")
 MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5001")
 
+
 def main():
     mlflow.set_tracking_uri(MLFLOW_URI)
     mlflow.set_registry_uri(MLFLOW_URI)
@@ -36,6 +37,7 @@ def main():
         raise RuntimeError(
             f"Exported model folder is not loadable as pyfunc: {e}"
         )
+
 
 if __name__ == "__main__":
     main()
